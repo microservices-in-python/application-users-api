@@ -1,0 +1,644 @@
+openapi: 3.0.0
+tags:
+  - name: groups
+    description: Group Resource Operations and Models
+  - name: users
+    description: User Resource Operations and Models
+info:
+  title: Application Users
+  version: '1.0'
+  description: |
+    **Application Users API** manages Users and Groups Resources. API provides typical CRUD operations for Resources and their Collections. API enables many-to-many relationships between Users and Groups.
+    There is no support for Authentication in this version of API.
+    [Full API Description text available here](https://docs.example.com/apis/ApplicationUsers)
+  contact:
+    name: API Support
+    url: 'https://support.example.com/apis'
+    email: support-apis@example.com
+  termsOfService: 'https://example.com/terms'
+  license:
+    name: Creative Commons 4.0
+    url: 'https://creativecommons.org/licenses/by/4.0/'
+servers:
+  - url: 'http://localhost:5000'
+    description: Development Server
+  - url: 'https://api.example.com/v1'
+    description: Production Server
+paths:
+  /users:
+    get:
+      summary: List and filter Users Collection
+      operationId: get-users
+      description: |-
+        Retrieve a list of User Resources matching optional filter.
+        List pagination and sorting are supported through dedicated URL Query String parameters.
+      parameters:
+        - schema:
+            type: string
+            example: 'jonh,terry1'
+          in: query
+          name: username
+          description: Matches Users with this value of username attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: string
+            example: 'John,Terry'
+          in: query
+          name: first
+          description: Matches Users with this value of firstname attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: string
+            example: Cleese
+          in: query
+          name: last
+          description: Matches Users with this value of lastname attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: string
+            example: john@example.com
+          in: query
+          name: email
+          description: Matches Users with this value of contactInfo.email attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: string
+            example: 123-456-7890
+          in: query
+          name: phone
+          description: Matches Users with this value of contactInfo.phone attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: integer
+            default: 0
+            example: 100
+            minimum: 0
+          in: query
+          name: offset
+          description: Pagination parameter requesting to start listing at this position (starting with 0)
+        - schema:
+            type: integer
+            example: 25
+            minimum: 1
+          in: query
+          name: limit
+          description: Pagination parameter requesting to limit number of listed resources
+        - schema:
+            type: string
+            example: 'username,firstname,lastname'
+          in: query
+          name: fields
+          description: List of comma separated attribute names to include in Response list. Resource URI (href) is always included
+          style: form
+        - schema:
+            type: string
+            example: 'lastname,-userid'
+          in: query
+          name: sortBy
+          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order and optional + for ascending
+          style: form
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: Optional Response format preference
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/User'
+                    - type: object
+                      properties:
+                        href:
+                          type: string
+                          format: uri
+                          description: URI of the User Resource
+              examples: {}
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '406':
+          description: Not Acceptable
+      security:
+        - API Key: []
+      tags:
+        - users
+    post:
+      summary: Create User Resource
+      operationId: post-users
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of new User Resource
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '406':
+          description: Not Acceptable
+      description: Create new User Resource using Representation in Request Body
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: "All mutable attributes must be present: 'username', 'firstname', 'lastname', 'contact.email' and 'contact.phone'. 'userid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - users
+  '/users/{userid}':
+    parameters:
+      - schema:
+          type: integer
+          example: 123
+          minimum: 0
+        name: userid
+        in: path
+        required: true
+        description: Unique id of User Resource
+    get:
+      summary: Retrieve User Resource Representation
+      operationId: get-user-userid
+      description: Returns User Resource in JSON format
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: Optional Response format preference
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '406':
+          description: Not Acceptable
+      security:
+        - API Key: []
+      tags:
+        - users
+    patch:
+      summary: Update User Resource Representation
+      operationId: patch-user-userid
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request - incorrect Request data
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '415':
+          description: Unsupported Media Type
+      description: Update User object with values present in Request Data JSON Object.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: "'username', 'firstname', 'lastname', 'contact.email' and 'contact.phone' are allowed, mutable attributes. 'userid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - users
+    put:
+      summary: Replace User Resource Representation
+      operationId: put-user-userid
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '415':
+          description: Unsupported Media Type
+      description: Replace values of all mutable User attributes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: "All mutable attributes must be present: 'username', 'firstname', 'lastname', 'contact.email' and 'contact.phone'. 'userid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - users
+    delete:
+      summary: Delete User Resource
+      operationId: delete-user-userid
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+      description: Permanently remove User Resource
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - users
+  /groups:
+    get:
+      summary: List and filter Groups Collection
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Group'
+                    - type: object
+                      properties:
+                        href:
+                          type: string
+                          format: uri
+                          description: Group Resource URI
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '406':
+          description: Not Acceptable
+      operationId: get-groups
+      description: |-
+        Retrieve a list of Group Resources matching optional filter.
+        List pagination and sorting are supported through dedicated URL Query String parameters.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: Optional Response format preference
+        - schema:
+            type: string
+          in: query
+          name: groupname
+          description: Matches Groups with this value of groupname attribute. Use comma separated list of names for logical alternative
+        - schema:
+            type: integer
+            default: 0
+            example: 100
+            minimum: 0
+          in: query
+          name: offset
+          description: Pagination parameter requesting to start listing at this position (starting with 0)
+        - schema:
+            type: integer
+            example: 25
+            minimum: 1
+          in: query
+          name: limit
+          description: Pagination parameter requesting to limit number of listed resources
+        - schema:
+            type: string
+          in: query
+          name: fields
+          description: List of comma separated attribute names to include in Response list. Resource URI (href) is always included
+          style: form
+        - schema:
+            type: string
+            example: 'groupname,description'
+          in: query
+          name: sortBy
+          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order and optional + for ascending
+          style: form
+        - schema:
+            type: integer
+            example: 123
+            minimum: 0
+          in: query
+          name: member
+          description: Filter groups which have this userid as a member
+      security:
+        - API Key: []
+      tags:
+        - groups
+    post:
+      summary: Create Group Resource
+      operationId: post-groups
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of new Group Resource
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '406':
+          description: Not Acceptable
+      description: Create new Group Resource using Representation in Request Body
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        description: "All mutable attributes must be present: 'groupname' and 'description'. 'groupid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+  '/groups/{groupid}':
+    parameters:
+      - schema:
+          type: integer
+          example: 123
+          minimum: 0
+        name: groupid
+        in: path
+        required: true
+        description: Unique id of Group Resource
+    get:
+      summary: Retrieve Group Resource Representation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '406':
+          description: Not Acceptable
+      operationId: get-groups-groupid
+      description: Returns Group Resource in JSON format
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: Optional Response format preference
+      security:
+        - API Key: []
+      tags:
+        - groups
+    put:
+      summary: Replace Group Resource Representation
+      operationId: put-groups-groupid
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '415':
+          description: Unsupported Media Type
+      description: Replace values of all mutable Group attributes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        description: "All mutable attributes must be present: 'groupname' and 'description'. 'groupid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+    patch:
+      summary: Update Group Resource Representation
+      operationId: patch-groups-groupid
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '415':
+          description: Unsupported Media Type
+      description: Update Group object with values present in Request Data JSON Object.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        description: "'groupname' and 'description' are allowed, mutable attributes. 'groupid' in Request Data JSON Object is ignored, if present."
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+    delete:
+      summary: Delete Group Resource
+      operationId: delete-groups-groupid
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+      description: Permanently remove Group Resource
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+  '/groups/{groupid}/members':
+    parameters:
+      - schema:
+          type: integer
+          example: 234
+          minimum: 0
+        name: groupid
+        in: path
+        required: true
+        description: Unique id of Group Resource
+    get:
+      summary: Retrieve Group members
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/User'
+                    - type: object
+                      properties:
+                        href:
+                          type: string
+                          format: uri
+                          description: User Resource URI
+        '401':
+          description: Unauthorized
+        '404':
+          description: Group not Found
+        '406':
+          description: Requested response body format not acceptable
+      operationId: get-groups-groupid-members
+      description: Read a JSON array listing User Resources being members of the Group
+      security:
+        - API Key: []
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: Optional Response format preference
+        - schema:
+            type: string
+            example: 'username,firstname,lastname,href'
+          in: query
+          name: fields
+          description: Comma separated list of User Scheme attributes to return in Response JSON array
+          style: form
+      tags:
+        - groups
+  '/groups/{groupid}/members/{userid}':
+    parameters:
+      - schema:
+          type: integer
+          example: 234
+          minimum: 0
+        name: groupid
+        in: path
+        required: true
+        description: Unique id of Group Resource
+      - schema:
+          type: integer
+          example: 123
+          minimum: 0
+        name: userid
+        in: path
+        required: true
+        description: Unique id of User Resource
+    put:
+      summary: Add User to Group
+      operationId: put-groups-groupid-members-userid
+      responses:
+        '200':
+          description: User already in the Group
+        '201':
+          description: User added to the Group
+        '401':
+          description: Unauthorized
+        '404':
+          description: Group or User not Found
+      description: 'Add User identified by userid to Group identified by groupid. Both User and Group must exist, otherwise 404 is returned.'
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+        - users
+    delete:
+      summary: Delete User from Group
+      operationId: delete-groups-groupid-members-userid
+      responses:
+        '200':
+          description: User deleted from Group
+        '401':
+          description: Unauthorized
+        '404':
+          description: Group or User not Found
+      description: 'Delete User identified by userid from Group identified by groupid. Both User and Group must exist, otherwise 404 is returned.'
+      security:
+        - JWT Bearer Token: []
+      tags:
+        - groups
+        - users
+components:
+  schemas:
+    User:
+      title: User Resource Model
+      type: object
+      description: 'User Data Model includes all Resource object attributes: client mutable and server generated'
+      properties:
+        userid:
+          type: integer
+          description: System generated; unique identification of User Resource; cannot be reused after User is deleted
+          example: 123
+          minimum: 0
+        username:
+          type: string
+          description: username must be unique among currently existing Users; client mutable
+          example: john1
+          pattern: "^[A-Za-z]\\w*$"
+          minLength: 3
+          maxLength: 20
+        firstname:
+          type: string
+          example: John
+          pattern: "^\\w[\\w\\-]*$"
+          minLength: 1
+          maxLength: 30
+        lastname:
+          type: string
+          example: Cleese
+          pattern: "^\\w[\\w\\-]*$"
+          minLength: 1
+          maxLength: 30
+        contactInfo:
+          type: object
+          properties:
+            email:
+              type: string
+              example: john.cleese@example.com
+              format: email
+            phone:
+              type: string
+              example: +1-123-456-7890
+              pattern: "^[0-9\\+][0-9\\-\\.]+$"
+              minLength: 6
+              maxLength: 20
+    Group:
+      title: Group
+      type: object
+      description: 'Group Data Model includes all Resource object attributes: client mutable and server generated'
+      properties:
+        groupid:
+          type: integer
+          description: System generated; unique identification of Group Resource; cannot be reused after Group is deleted
+          example: 123
+          minimum: 0
+        groupname:
+          type: string
+          example: admins
+          pattern: "^[A-Za-z]\\w*$"
+          minLength: 3
+          maxLength: 20
+        description:
+          type: string
+  securitySchemes:
+    API Key:
+      name: X-API-Key
+      type: apiKey
+      in: header
+      description: Global Application Users Service API Key
+    JWT Bearer Token:
+      type: http
+      scheme: bearer
+      description: JWT Bearer Token for Resource modification operations
