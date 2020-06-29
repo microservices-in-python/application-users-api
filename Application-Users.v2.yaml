@@ -94,7 +94,7 @@ paths:
             example: 'lastname,-userid'
           in: query
           name: sortBy
-          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order and optional + for ascending
+          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order
           style: form
         - schema:
             type: string
@@ -335,7 +335,7 @@ paths:
             example: 'groupname,description'
           in: query
           name: sortBy
-          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order and optional + for ascending
+          description: List of comma separated attribute names to use in sorting the list. Use - (minus) prefix for descending order
           style: form
         - schema:
             type: integer
