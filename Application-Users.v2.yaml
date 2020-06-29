@@ -60,13 +60,13 @@ paths:
             example: john@example.com
           in: query
           name: email
-          description: Matches Users with this value of contactInfo.email attribute. Use comma separated list of names for logical alternative
+          description: Matches Users with this value of contactInfo.email attribute.
         - schema:
             type: string
             example: 123-456-7890
           in: query
           name: phone
-          description: Matches Users with this value of contactInfo.phone attribute. Use comma separated list of names for logical alternative
+          description: Matches Users with this value of contactInfo.phone attribute.
         - schema:
             type: integer
             default: 0
